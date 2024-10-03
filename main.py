@@ -1,45 +1,61 @@
+from abc import ABC, abstractmethod
 import random
 
 
-class Hero:
-    def __init__(self, name, health=100, attack_power=random.randint(15,40)):
+class Hero(ABC):
+    def __init__(self, name, hp=100):
         self.name = name
-        self.health = health
-        self.attack_power = attack_power
+        self.hp = hp
+        self.attack_power = random.randint(10, 20)
 
-    def attack(self, other):
-        damage = self.attack_power
-        other.health -= damage
-        print(f"{self.name} атакует {other.name} и наносит {damage} урона.")
+    @abstractmethod
+    def attack(self, target):
+        pass
 
     def is_alive(self):
-        return self.health > 0
+        return self.hp > 0
+
+
+class Player(Hero):
+    def __init__(self, name):
+        super().__init__(name)
+
+    def attack(self, target):
+        target.hp -= self.attack_power
+        print(f"{self.name.title()} атакует {target.name}! Остаток hp: {target.hp}.")
+
+
+class Computer(Hero):
+    def __init__(self, name):
+        super().__init__(name)
+
+    def attack(self, target):
+        target.hp -= self.attack_power
+        print(f"{self.name} дубасит игрока наотмашь!"
+              f" Остаток hp составляет {target.hp}.\n")
 
 
 class Game:
     def __init__(self):
-        player_name = input("Введите имя вашего героя: ")
-        self.player = Hero(player_name)
-        self.computer = Hero("Компьютерный противник")
+        player_name = input("Введите имя своего героя: ")
+        self.player = Player(player_name)
+        self.computer = Computer('r2d2')
 
     def start(self):
-        print("Начало игры!")
+        print(f"Начинается поединок между {self.player.name.title()} и "
+              f"{self.computer.name}.")
+        print("Да победит тот, кого осенит благодатью рандом!\n")
         while self.player.is_alive() and self.computer.is_alive():
-            # Игрок атакует
             self.player.attack(self.computer)
             if not self.computer.is_alive():
-                print(f"{self.computer.name} повержен! {self.player.name} побеждает!")
+                print(f"Победа за {self.player.name.title()}!")
                 break
-            print(f"У {self.computer.name} осталось {self.computer.health} здоровья.\n")
 
-            # Компьютер атакует
             self.computer.attack(self.player)
             if not self.player.is_alive():
-                print(f"{self.player.name} повержен! {self.computer.name} побеждает!")
+                print(f"Герой по имени {self.player.name.title()} пал жертвой рандома...")
                 break
-            print(f"У {self.player.name} осталось {self.player.health} здоровья.\n")
 
 
-if __name__ == "__main__":
-    game = Game()
-    game.start()
+game = Game()
+game.start()
